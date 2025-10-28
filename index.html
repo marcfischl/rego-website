@@ -4,9 +4,96 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rego Reminder</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f9fa; margin: 0; }
+    .container { max-width: 480px; margin: 60px auto; background: white; padding: 30px;
+      border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #004aad; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
+    button { margin-top: 20px; width: 100%; padding: 12px; background: #004aad; color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #0060ff; }
+    .msg { text-align: center; margin-top: 20px; }
+  </style>
 </head>
-<body style="font-family: Arial; text-align:center; margin-top:50px;">
-  <h1>🚗 Rego Reminder</h1>
-  <p>Your simple website is live!</p>
+<body>
+  <div class="container">
+    <h1>🚗 Rego Reminder</h1>
+    <p>Get a friendly email or SMS before your rego expires.</p>
+
+    <form id="regoForm">
+      <label for="plate">Rego Plate</label>
+      <input id="plate" name="plate" required placeholder="e.g. ABC123">
+
+      <label for="state">State</label>
+      <select id="state" name="state" required>
+        <option value="NSW">NSW</option>
+        <option value="VIC">VIC</option>
+        <option value="QLD">QLD</option>
+        <option value="SA">SA</option>
+        <option value="WA">WA</option>
+        <option value="TAS">TAS</option>
+        <option value="NT">NT</option>
+        <option value="ACT">ACT</option>
+      </select>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required placeholder="you@example.com">
+
+      <label for="phone">Mobile Number</label>
+      <input type="tel" id="phone" name="phone" placeholder="+61 4xx xxx xxx">
+
+      <label>
+        <input type="checkbox" id="smsOptIn">
+        Send me SMS reminders too
+      </label>
+
+      <label>
+        <input type="checkbox" id="consent" required>
+        I agree to receive registration reminders and messages.
+      </label>
+
+      <button type="submit">Check My Rego</button>
+      <p class="msg" id="msg"></p>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('regoForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      msg.textContent = "Checking...";
+      
+      const data = {
+        plate: form.plate.value.trim(),
+        state: form.state.value,
+        email: form.email.value.trim(),
+        phone: form.phone.value.trim(),
+        smsOptIn: form.smsOptIn.checked,
+        consent: form.consent.checked
+      };
+
+      // 🔗 Replace this later with your backend URL
+      const apiURL = "https://your-backend.onrender.com/search";
+
+      try {
+        const res = await fetch(apiURL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.ok) {
+          msg.textContent = `✅ Rego found! Expiry: ${result.expiry_date}`;
+        } else {
+          msg.textContent = `⚠️ ${result.error || "Could not check rego."}`;
+        }
+      } catch (err) {
+        msg.textContent = "⚠️ Connection error — backend not ready yet.";
+      }
+    });
+  </script>
 </body>
 </html>
